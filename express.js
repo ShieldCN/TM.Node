@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var fs = require("fs");
 
 //  主页输出 "Hello World"
 app.get('/', function (req, res) {
@@ -20,10 +21,44 @@ app.get('/del_user', function (req, res) {
     res.send('删除页面');
 })
 
-//  /list_user 页面 GET 请求
-app.get('/list_user', function (req, res) {
-    console.log("/list_user GET 请求");
-    res.send('用户列表页面');
+// category list -get
+app.get('/category', function (req, res) {
+    console.log("/category GET 请求");
+    fs.readFile(__dirname + "/" + "category.json", 'utf8', function (err, data) {
+        if (data) {
+            res.send({
+                state: 0,
+                data: JSON.stringify(data),
+                message: 'success'
+            });
+        } else {
+            res.send({
+                state: 1,
+                data: [],
+                message: '不存在'
+            });
+        }
+    });
+})
+// category add -post
+app.post('/category', function (req, res) {
+    console.log("/category POST 请求");
+    // 读取已存在的数据
+    fs.readFile(__dirname + "/" + "category.json", 'utf8', function (err, data) {
+        console.log(req)
+        if (data) {
+            data = JSON.parse(data);
+            
+            console.log(data);
+            res.end({
+                state: 0,
+                data: null,
+                message: 'success'
+            });
+        } else {
+
+        }
+    });
 })
 
 // 对页面 abcd, abxcd, ab123cd, 等响应 GET 请求
