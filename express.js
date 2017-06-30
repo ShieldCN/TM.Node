@@ -66,7 +66,9 @@ app.get('/ab*cd', function (req, res) {
     console.log("/ab*cd GET 请求");
     res.send('正则匹配');
 })
-
+app.all('*', function(req, res, next) {
+    req.header("Access-Control-Allow-Origin", '*');
+})
 
 var server = app.listen(2436, function () {
 
