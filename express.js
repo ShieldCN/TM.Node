@@ -3,6 +3,7 @@ var app = express();
 var bodyParser = require('body-parser');
 require("./route/category.js");
 require("./route/user.js");
+require("./route/memorandum.js");
 
 app.use(bodyParser.json());
 //allow custom header and CORS
@@ -20,7 +21,7 @@ app.all('*', function (req, res, next) {
 });
 categoryInit(app);
 userInit(app);
-
+memorandumInit(app);
 var server = app.listen(2436, function () {
     var host = server.address().address
     var port = server.address().port

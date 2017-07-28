@@ -1,11 +1,11 @@
 var fs = require("fs");
 var crypto = require('crypto');
 (function () {
-    categoryInit = function (app) {
-        // category list -get
-        app.get('/category', function (req, res) {
-            console.log("/category GET 请求");
-            fs.readFile("./localdb/"+req.headers.authorization+"/category.json", 'utf8', function (err, data) {
+    memorandumInit = function (app) {
+        // memorandum list -get
+        app.get('/memorandum', function (req, res) {
+            console.log("/memorandum GET 请求");
+            fs.readFile("./localdb/"+req.headers.authorization+"/memorandum.json", 'utf8', function (err, data) {
                 if (data) {
                     data = JSON.parse(data);
                     res.send({
@@ -22,11 +22,11 @@ var crypto = require('crypto');
                 }
             });
         })
-        // category add -post
-        app.post('/category', function (req, res) {
-            console.log("/category POST 请求");
+        // memorandum add -post
+        app.post('/memorandum', function (req, res) {
+            console.log("/memorandum POST 请求");
             // 读取已存在的数据
-            fs.readFile("./localdb/"+req.headers.authorization+"/category.json", 'utf8', function (err, data) {
+            fs.readFile("./localdb/"+req.headers.authorization+"/memorandum.json", 'utf8', function (err, data) {
                 var message = "success";
                 var state = 0;
                 if (req.body.name) {
@@ -41,10 +41,14 @@ var crypto = require('crypto');
                         } else {
                             data.push({
                                 id: newId(),
-                                name: req.body.name
+                                name: req.body.name,
+                                category: req.body.category,
+                                functionDesc: req.body.functionDesc,
+                                details: req.body.details,
+                                tabs: req.body.tabs
                             });
                             data = JSON.stringify(data);
-                            fs.writeFile('./localdb/'+req.headers.authorization+'/category.json', data, function (err) {
+                            fs.writeFile('./localdb/'+req.headers.authorization+'/memorandum.json', data, function (err) {
                                 if (err) {
                                     return console.error(err);
                                 }
@@ -56,7 +60,7 @@ var crypto = require('crypto');
                             name: req.body.name
                         }];
                         data = JSON.stringify(data);
-                        var writerStream = fs.createWriteStream('./localdb/'+req.headers.authorization+'/category.json');
+                        var writerStream = fs.createWriteStream('./localdb/'+req.headers.authorization+'/memorandum.json');
                         writerStream.write(data, 'UTF8');
                         writerStream.end();
                     }
@@ -72,11 +76,11 @@ var crypto = require('crypto');
             });
         })
 
-        // category edit -put
-        app.put('/category/:id', function (req, res) {
-            console.log("/category PUT 请求");
+        // memorandum edit -put
+        app.put('/memorandum/:id', function (req, res) {
+            console.log("/memorandum PUT 请求");
             // 读取已存在的数据
-            fs.readFile("./localdb/"+req.headers.authorization+"/category.json", 'utf8', function (err, data) {
+            fs.readFile("./localdb/"+req.headers.authorization+"/memorandum.json", 'utf8', function (err, data) {
                 var message = "success";
                 var state = 0;
                 if (req.body.name) {
@@ -86,9 +90,16 @@ var crypto = require('crypto');
                             return req.params.id == item.id;
                         });
                         if (idx > -1) {
-                            data[idx].name = req.body.name;
+                            data[idx]={
+                                id:req.params.id,
+                                name: req.body.name,
+                                category: req.body.category,
+                                functionDesc: req.body.functionDesc,
+                                details: req.body.details,
+                                tabs: req.body.tabs
+                            }
                             data = JSON.stringify(data);
-                            fs.writeFile('./localdb/'+req.headers.authorization+'/category.json', data, function (err) {
+                            fs.writeFile('./localdb/'+req.headers.authorization+'/memorandum.json', data, function (err) {
                                 if (err) {
                                     return console.error(err);
                                 }
@@ -112,11 +123,11 @@ var crypto = require('crypto');
                 });
             });
         })
-        // category delete -delete
-        app.delete('/category/:id', function (req, res) {
-            console.log("/category DELETE 请求");
+        // memorandum delete -delete
+        app.delete('/memorandum/:id', function (req, res) {
+            console.log("/memorandum DELETE 请求");
             // 读取已存在的数据
-            fs.readFile("./localdb/"+req.headers.authorization+"/category.json", 'utf8', function (err, data) {
+            fs.readFile("./localdb/"+req.headers.authorization+"/memorandum.json", 'utf8', function (err, data) {
                 var message = "success";
                 var state = 0;
                 if (data) {
@@ -127,7 +138,7 @@ var crypto = require('crypto');
                     if (idx > -1) {
                         data.splice(idx, 1);
                         data = JSON.stringify(data);
-                        fs.writeFile('./localdb/'+req.headers.authorization+'/category.json', data, function (err) {
+                        fs.writeFile('./localdb/'+req.headers.authorization+'/memorandum.json', data, function (err) {
                             if (err) {
                                 return console.error(err);
                             }

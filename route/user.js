@@ -3,13 +3,13 @@ var crypto = require('crypto');
 (function () {
     // login -post
     userInit = function (app) {
-        // user add -post
         app.post('/login', function (req, res) {
             console.log("/user POST 请求");
             // 读取已存在的数据
             fs.readFile("./localdb/user.json", 'utf8', function (err, data) {
                 var message = "success";
                 var state = 0;
+                var rdata=null;
                 if (req.body.username && req.body.password) {
                     if (data) {
                         data = JSON.parse(data);
@@ -18,6 +18,9 @@ var crypto = require('crypto');
                         });
                         if (idx > -1 && req.body.password == data[idx].password) {
                             message = "登录成功";
+                            rdata={
+                                token:data[idx].id
+                            }
                         } else {
                             state = 1;
                             message = "用户名或密码错误";
@@ -32,7 +35,7 @@ var crypto = require('crypto');
                 }
                 res.send({
                     state: state,
-                    data: null,
+                    data: rdata,
                     message: message
                 });
             });
@@ -73,13 +76,19 @@ var crypto = require('crypto');
                         state = 1;
                         message = "用户名不能重复";
                     } else {
+                        let mdId=newId();
                         data.push({
-                            id: newId(),
+                            id: mdId,
                             username: req.body.username,
                             password: req.body.password
                         });
                         data = JSON.stringify(data);
                         fs.writeFile('./localdb/user.json', data, function (err) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                        });
+                        fs.mkdir("./localdb/"+mdId,function(err){
                             if (err) {
                                 return console.error(err);
                             }
@@ -155,6 +164,11 @@ var crypto = require('crypto');
                         data.splice(idx, 1);
                         data = JSON.stringify(data);
                         fs.writeFile('./localdb/user.json', data, function (err) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                        });
+                        fs.rmdir("./localdb/"+req.params.id,function(err){
                             if (err) {
                                 return console.error(err);
                             }
