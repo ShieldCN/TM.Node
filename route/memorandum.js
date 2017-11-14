@@ -8,10 +8,33 @@ var crypto = require('crypto');
             fs.readFile("./localdb/"+req.headers.authorization+"/memorandum.json", 'utf8', function (err, data) {
                 if (data) {
                     data = JSON.parse(data);
-                    res.send({
-                        state: 0,
-                        data: data,
-                        message: 'success'
+                    fs.readFile("./localdb/"+req.headers.authorization+"/category.json", 'utf8', function (err, cdata) {
+                        if (cdata) {
+                            cdata = JSON.parse(cdata);
+                            let params=req.query;
+                            var resData=[];
+                            data.forEach(function(item) {
+                                let canPush=true;
+                                if(params.name&&item.name.indexOf(params.name)==-1){
+                                    canPush=false;
+                                }
+                                if(params.category&&item.category!=params.category){
+                                    canPush=false;
+                                }
+                                if(canPush){
+                                    let categoryd=cdata.find(it=>{
+                                        return it.id==item.category;
+                                    });
+                                    item.categoryText=categoryd?categoryd.name:"";       
+                                    resData.push(item);  
+                                }
+                            }, this);
+                            res.send({
+                                state: 0,
+                                data: resData,
+                                message: 'success'
+                            });
+                        }
                     });
                 } else {
                     res.send({
@@ -39,7 +62,7 @@ var crypto = require('crypto');
                             state = 1;
                             message = "名称不能重复";
                         } else {
-                            data.push({
+                            data.unshift({
                                 id: newId(),
                                 name: req.body.name,
                                 category: req.body.category,
@@ -157,7 +180,37 @@ var crypto = require('crypto');
                     message: message
                 });
             });
-        })
+        });
+        // memorandum delete -delete
+        app.get('/memorandum/:id', function (req, res) {
+            console.log("/memorandum/:id GET 请求");
+            // 读取已存在的数据
+            fs.readFile("./localdb/"+req.headers.authorization+"/memorandum.json", 'utf8', function (err, data) {
+                var message = "success";
+                var state = 0;
+                var resData=null;
+                if (data) {
+                    data = JSON.parse(data);
+                    var idx = data.findIndex(item => {
+                        return req.params.id == item.id;
+                    });
+                    if (idx > -1) {
+                        resData=data[idx];
+                    } else {
+                        state = 1;
+                        message = "数据已删除";
+                    }
+                } else {
+                    state = 1;
+                    message = "数据已删除";
+                }
+                res.send({
+                    state: state,
+                    data: resData,
+                    message: message
+                });
+            });
+        });
     }
 
 })();
